@@ -15,14 +15,20 @@ class CustomerController extends Controller
     {        
         try {
             $authentication  = DB::table('authentication_tokens AS auth')
-                                //->where('id_user',auth()->user()->id)
-                                ->where('expired',0)
-                                ->orderByDesc('created_at')
-                                ->first();
-            
-            if(now()->toDateTimeString() > $authentication->expires_at){
+        //->where('id_user',auth()->user()->id)
+        ->where('expired',0)
+        ->orderByDesc('created_at')
+        ->first();
+
+        if(now()->toDateTimeString() > $authentication->expires_at){
+           $expired= DB::table('authentication_tokens')
+            ->where('id_authentication_token', $authentication->id_authentication_token)
+            ->update(['expired' => 1]);
+
+            if($expired){
                 return response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
             }
+        }
 
             if(isset($request->op) && $request->op == 'all'){
                 $data = DB::table('customers')
@@ -60,7 +66,13 @@ class CustomerController extends Controller
         ->first();
 
         if(now()->toDateTimeString() > $authentication->expires_at){
-             return response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+           $expired= DB::table('authentication_tokens')
+            ->where('id_authentication_token', $authentication->id_authentication_token)
+            ->update(['expired' => 1]);
+
+            if($expired){
+                return response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+            }
         }
 
         $validator = Validator::make($request->all(),[
@@ -126,7 +138,13 @@ class CustomerController extends Controller
         ->first();
 
         if(now()->toDateTimeString() > $authentication->expires_at){
-             return response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+           $expired= DB::table('authentication_tokens')
+            ->where('id_authentication_token', $authentication->id_authentication_token)
+            ->update(['expired' => 1]);
+
+            if($expired){
+                return response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+            }
         }
         
         $customerData = DB::table('customers')
