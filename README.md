@@ -1,66 +1,87 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## API de Customer
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Esta API proporciona endpoints para administrar clientes en un sistema.
 
-## About Laravel
+## Endpoints Disponibles
+Listar clientes
+bash
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+GET /api/customers
+Este endpoint permite obtener una lista de clientes. Se pueden proporcionar parámetros opcionales para filtrar los resultados.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Parámetros
+op: (Opcional) Si se establece como 'all', se devolverán todos los clientes sin filtrar.
+Respuestas
+200 OK: Se devuelve una lista de clientes en formato JSON.
+401 Unauthorized: Token de autenticación expirado.
+500 Error de servidor: Ocurre un error al procesar la solicitud.
+Registrar nuevo cliente
+bash
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+## POST /api/customers
+Este endpoint permite registrar un nuevo cliente en el sistema.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Parámetros
+dni: (Requerido) DNI del cliente.
+id_reg: (Requerido) ID de la región del cliente.
+id_com: (Requerido) ID de la comuna del cliente.
+email: (Requerido) Correo electrónico del cliente.
+name: (Requerido) Nombre del cliente.
+last_name: (Requerido) Apellido del cliente.
+address: (Opcional) Dirección del cliente.
+token: (Requerido) Token de autenticación.
+Respuestas
+200 OK: Se devuelve el cliente registrado en formato JSON.
+400 Bad Request: Error en los datos del cliente.
+404 Not Found: La comuna o región no están relacionadas o no existen.
+500 Error de servidor: Ocurre un error al procesar la solicitud.
+Eliminar cliente
+bash
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## DELETE /api/customers/{dni}
+Este endpoint permite eliminar un cliente del sistema.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Parámetros
+dni: (Requerido) DNI del cliente a eliminar.
+Respuestas
+200 OK: El cliente se elimina correctamente.
+400 Bad Request: Fallo al eliminar el cliente.
+401 Unauthorized: Token de autenticación expirado.
+404 Not Found: No se encuentra el cliente a eliminar.
 
-## Laravel Sponsors
+## Nota Importante
+Para acceder a los endpoints de la API GET de Customer, asegúrate de incluir un token de autenticación válido en las solicitudes. Esta API está protegida por un middleware llamado EnsureTokenIsValid, que verifica la validez del token antes de permitir el acceso el token es: ttywrmgkRoTHROmCsq7nO9T40cWKnYYkuoRBmMSoPnA0a .
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Requisitos Previos
+PHP >= 7.0
+Laravel Framework
+Base de datos MySQL
+Instalación
+Clona este repositorio.
+Configura el archivo .env con la información de tu base de datos.
+Ejecuta composer install para instalar las dependencias de Laravel.
+Ejecuta php artisan migrate para crear las tablas necesarias en la base de datos.
+Ejecuta php artisan serve para iniciar el servidor de desarrollo.
+Contribución
+¡Las contribuciones son bienvenidas! Si deseas contribuir a este proyecto, realiza una bifurcación y envía una solicitud de extracción.
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## API de Login
+Este controlador maneja la autenticación de usuarios en el sistema.
 
-## Contributing
+Endpoints Disponibles
+Iniciar sesión
+bash
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## POST /api/login
+Este endpoint permite a los usuarios iniciar sesión en el sistema proporcionando sus credenciales.
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Parámetros
+email: (Requerido) Correo electrónico del usuario.
+password: (Requerido) Contraseña del usuario.
+Respuestas
+200 OK: El usuario inicia sesión correctamente y se genera un token de autenticación.
+400 Bad Request: Error en la validación de los datos.
+401 Unauthorized: Credenciales incorrectas o error en la autenticación.
+500 Error de servidor: Ocurre un error al procesar la solicitud.
