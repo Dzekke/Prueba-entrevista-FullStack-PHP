@@ -13,6 +13,7 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {        
+        $response = "";
         try {
             $authentication  = DB::table('authentication_tokens AS auth')
         //->where('id_user',auth()->user()->id)
@@ -26,7 +27,9 @@ class CustomerController extends Controller
             ->update(['expired' => 1]);
 
             if($expired){
-                return response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+                $response = response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+                $this->logApiRequestResponse($request->all(),$response);
+                return $response;
             }
         }
 
@@ -47,18 +50,22 @@ class CustomerController extends Controller
                 ->selectRaw('name,last_name,IF(address="", NULL, address) AS address,communes.description AS communeDescription,regions.description AS regionDescription')
                 ->get();
             }
-                return response()->json(['data' => $data ,'status'=> true], 200);
+                $response = response()->json(['data' => $data ,'status'=> true], 200);
+                $this->logApiRequestResponse($request->all(),$response); 
+                return $response;
         } catch (\Exception $e) {
-            return response()->json([
+            $response = response()->json([
                 'msg' => 'Error data not found',
                 'status' => false,
                 'error' => $e->getMessage(),
             ], 500);
+            $this->logApiRequestResponse($request->all(),$response); 
+            return $response;
         }
     }
 
     public function newCustomer(Request $request){
-
+        $response = "";
         $authentication  = DB::table('authentication_tokens AS auth')
         //->where('id_user',auth()->user()->id)
         ->where('expired',0)
@@ -71,7 +78,9 @@ class CustomerController extends Controller
             ->update(['expired' => 1]);
 
             if($expired){
-                return response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+                $response = response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+                $this->logApiRequestResponse($request->all(),$response);
+                return $response;
             }
         }
 
@@ -92,7 +101,9 @@ class CustomerController extends Controller
                 'errors' => $validator->errors(),
                 'status' => 400
             ];
-            return response()->json($data,400);
+            $response = response()->json($data,400);
+            $this->logApiRequestResponse($request->all(),$response);
+            return $response;
         }
         try {
                 $commune = DB::table('communes')
@@ -116,17 +127,24 @@ class CustomerController extends Controller
                     $customer->address = $request->address??null;
                     $customer->date_reg= now()->toDateTimeString();
                     $customer->save();
-                    return response()->json(['data' => $customer ,'status'=> true], 200);
+                    $response = response()->json(['data' => $customer ,'status'=> true], 200);
+                    $this->logApiRequestResponse($request->all(),$response);
+                    return $response;
                 }else{
-                    return response()->json(['error' =>'commune or regione not related or non-existent'  ,'status'=> false], 404);
+                    $response = response()->json(['error' =>'commune or regione not related or non-existent','status'=> false], 404);
+                    $this->logApiRequestResponse($request->all(),$response);
+                    return $response;
                 }
+                   
             } catch (\Exception $e) {
-                return response()->json([
+                $response = response()->json([
                     'msg' => 'Error when registering customer',
                     'status' => false,
                     'error' => $e->getMessage(),
                 ], 500);
-            }    
+                $this->logApiRequestResponse($request->all(),$response);
+                return $response;
+            }
     }
 
     public function deleteCustomer($dni){
@@ -143,7 +161,9 @@ class CustomerController extends Controller
             ->update(['expired' => 1]);
 
             if($expired){
-                return response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+                $response = response()->json(['msg' => 'Unauthorized, expired token' ,'status'=> false], 401);
+                $this->logApiRequestResponse($dni,$response);
+                return $response;
             }
         }
         
@@ -153,7 +173,9 @@ class CustomerController extends Controller
         ->first();
 
         if($customerData){
-        return response()->json(['error' =>'Record not found','status'=> false], 404);
+        $response = response()->json(['error' =>'Record not found','status'=> false], 404);
+        $this->logApiRequestResponse($dni,$response);
+        return $response;
         }
 
         $customer =  DB::table('customers')
@@ -161,8 +183,30 @@ class CustomerController extends Controller
         ->update(['status' => 3]);
             
         if ($customer){
-            return response()->json(['data' => $customer  ,'msg' => 'customer successfully deleted' ,'status'=> true], 200);
+            $response = response()->json(['data' => $customer  ,'msg' => 'customer successfully deleted' ,'status'=> true], 200);
+            $this->logApiRequestResponse($dni,$response);
+            return $response;
+
         }
-        return response()->json(['error' =>'Failed to delete customer','status'=> false], 400);
+        $response = response()->json(['error' =>'Failed to delete customer','status'=> false], 400);
+        $this->logApiRequestResponse($dni,$response);
+        return $response;
+
+    }
+
+
+    private function logApiRequestResponse($request, $response)
+    {
+        $ip = $_SERVER['REMOTE_ADDR'];
+
+        
+        $requestData =  json_encode($request);
+        $responseData = $response;
+
+        DB::table('api_logs')->insert([
+            'ip_address'       => $ip, 
+            'request_data'     => $requestData,
+            'response_data'    => $responseData,
+        ]);
     }
 }
