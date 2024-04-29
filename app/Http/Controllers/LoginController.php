@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Customer;
+use App\Models\User;
+
 
 class LoginController extends Controller
 {
 
     public function login(Request $request)
-    {
+    { 
         $validator = Validator::make($request->all(),[
             'email'     => 'required|email',
             'password'  => 'required'
@@ -29,32 +31,32 @@ class LoginController extends Controller
         $email = $request->email;
         $pass = $request->password;
         try {
-            $userAccount = DB::table('users')
-                            ->where('email', $email)
-                            ->where('password', $pass)
-                            ->where('login', 0)
-                            ->whereNull('deleted_at')
-                            ->first();
+            $credentials = $request->validate([
+                'email' => ['required','string','email'],
+                'password' =>['required','string']
+            ]);
 
-            if ($userAccount){
-                $login = DB::table('users')
-                ->where('id_user', $userAccount->id_user) 
-                ->update(['login' => 1]);
-
-                if ($login) {
+            $user = User::where('email','=',$email)->first();
+            if($user && hash::check($pass, $user->password)){
+                Auth::attempt($credentials);
+                //Auth::login($user);
+                if(Auth::check()){
+                    $currentUser = auth()->user();
+                    
                     $token = $this->createToken($email);
                     DB::table('authentication_tokens')->insert([
-                        'id_user'       => $userAccount->id_user, 
+                        'id_user'       => $currentUser->id, 
                         'token'         => $token,
                         'expires_at'    => now()->addMinutes(2),
                     ]);
+                return response()->json(['message' => 'Successful login','login' => true, 'user' => $currentUser]);
+                }else{
+                return response()->json(['error' => 'error in Auth::check ','login' => false], 401);
                 }
-        
-                return response()->json(['message' => 'Login successful','login' => true]);
-            } else {
+            }else{
                 return response()->json(['error' => 'Incorrect credentials','login' => false], 401);
-            }
-        } catch (\Exception $e) {
+            }           
+        }catch (\Exception $e) {
             return response()->json([
                 'msg' => 'Error in login',
                 'status' => false,
