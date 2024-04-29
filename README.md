@@ -6,7 +6,7 @@ Esta API proporciona endpoints para administrar clientes en un sistema.
 Listar clientes
 bash
 
-GET /api/customers
+## GET /api/customers
 Este endpoint permite obtener una lista de clientes. Se pueden proporcionar parámetros opcionales para filtrar los resultados.
 
 ## Parámetros
